@@ -1,14 +1,19 @@
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class StepTracker {
 
-    private final MonthData[] monthData = new MonthData[12];
-    private static final Converter converter = new Converter();
+    private final MonthData[] monthData;
+    private static final Converter converter;
     private int targetNumberOfSteps;
 
+    static {
+        converter = new Converter();
+    }
+
     public StepTracker() {
+        monthData = new MonthData[12];
         Arrays.fill(monthData, new MonthData());
         targetNumberOfSteps = 10_000;
     }
@@ -86,8 +91,11 @@ public class StepTracker {
         return copyOfRangeFromTo(chain, firstIndex, maxSequence);
     }
 
+    /**
+     * Исправил на LinkedHashMap
+     */
     private Map<Integer, Integer> copyOfRangeFromTo(int[] array, int start, int length) {
-        Map<Integer, Integer> map = new HashMap<>();
+        Map<Integer, Integer> map = new LinkedHashMap<>();
 
         for (int i = start; i < start + length; i++) {
             map.put(i, array[i]);
@@ -102,10 +110,28 @@ public class StepTracker {
         return converter.calculateKkal(steps);
     }
 
-    public double calculateStepsToKm(int month, int day) {
+    public double calculateStepsToCalForMonth(int month) {
+        int[] steps = monthData[month].getArray();
+
+        return converter.calculateKkal(Arrays.stream(steps).sum());
+    }
+
+    public double calculateStepsToKmForDay(int month, int day) {
         int steps = monthData[month].getArray()[day];
 
         return converter.calculateStepsToKm(steps);
+    }
+
+    public double calculateStepsToKmForMonth(int month) {
+        int[] steps = monthData[month].getArray();
+
+        return converter.calculateStepsToKm(Arrays.stream(steps).sum());
+    }
+
+    public int calculateAverage(int month) {
+        int[] steps = monthData[month].getArray();
+
+        return (getTotalStepsByMonth(month) / steps.length);
     }
 
     private static class MonthData {

@@ -1,51 +1,63 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Menu {
 
+    private static final Scanner scanner;
+    private static final List<String> menu;
     private final StepTracker stepTracker;
 
     public Menu(StepTracker stepTracker) {
         this.stepTracker = stepTracker;
     }
 
+    public List<String> getMenu() {
+        return menu;
+    }
+
+    public static void setMenu(String menuItem) {
+        menu.add(menuItem);
+    }
+
+    static {
+        scanner = new Scanner(System.in);
+        menu = new ArrayList<>();
+        initializationMenu();
+    }
+
+    /**
+     * Теперь, если добавить два простых метода для menu, можно получить пункт меню по индексу,
+     * изменить его и сохранить. На данном этапе это излишне, не стал писать неиспользуемые методы.
+     * Хотя этот комментарий длинее, чем получились бы два метода))
+     */
+    private static void initializationMenu() {
+        setMenu("1 - Общее количество пройденных шагов за месяц");
+        setMenu("2 - Максимальное количество пройденных шагов за месяц");
+        setMenu("3 - Результат за день");
+        setMenu("4 - Ввод цели по количеству шагов в день");
+        setMenu("5 - Сохранить результаты");
+        setMenu("6 - Лучшая серия за период");
+        setMenu("7 - Ккал за день");
+        setMenu("8 - Сколько км я прошел");
+        setMenu("9 - Вывод статистики за месяц");
+        setMenu("0 - Выход");
+    }
+
     public void input() {
-        Scanner scanner = new Scanner(System.in);
-        printMenu().forEach(System.out::println);
+        getMenu().forEach(System.out::println);
 
         int userInput = scanner.nextInt();
 
         while (userInput != 0) {
             processingMenuItems(userInput);
-            printMenu().forEach(System.out::println);
+            getMenu().forEach(System.out::println);
             userInput = scanner.nextInt();
         }
         System.out.println("Программа завершена");
     }
 
-    private List<String> printMenu() {
-        List<String> menu = new ArrayList<>();
-        menu.add("1 - Общее количество пройденных шагов за месяц");
-        menu.add("2 - Максимальное количество пройденных шагов за месяц");
-        menu.add("3 - Результат за день");
-        menu.add("4 - Ввод цели по количеству шагов в день");
-        menu.add("5 - Вывод статистики за месяц");
-        menu.add("6 - Сохранить результаты");
-        menu.add("7 - Лучшая серия за период");
-        menu.add("8 - Ккал за день");
-        menu.add("9 - Сколько км я прошел");
-        menu.add("0 - Выход");
-
-        return menu;
-    }
-
     private void processingMenuItems(int item) {
-        if (!checkCorrectOfTheInput(item)) {
-            System.err.println("Incorrect Input");
-        }
-
         switch (item) {
             case 1:
                 getResultByMonth();
@@ -60,28 +72,23 @@ public class Menu {
                 enterGoalForDay();
                 break;
             case 5:
-                outputStatisticsByMonth();
-                break;
-            case 6:
                 saveResultSteps();
                 break;
-            case 7:
+            case 6:
                 findOutTheBestSeries();
                 break;
-            case 8:
+            case 7:
                 calculateCalories();
                 break;
-            case 9:
+            case 8:
                 calculateToKm();
                 break;
-            default:
+            case 9:
+                outputStatisticsByMonth();
                 break;
+            default:
+                System.err.println("Incorrect Input");
         }
-    }
-
-    private boolean checkCorrectOfTheInput(int item) {
-        int sizeOfMenu = printMenu().size();
-        return item <= sizeOfMenu - 1 && item >= 0;
     }
 
     private void getResultByMonth() {
@@ -103,7 +110,6 @@ public class Menu {
     }
 
     private int returnItemOfMonth() {
-        Scanner scanner = new Scanner(System.in);
         System.out.println("\nВыберите месяц\n");
 
         for (int i = 1; i <= Month.values().length; i++) {
@@ -117,7 +123,6 @@ public class Menu {
     }
 
     private int returnItemOfDay() {
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Введите день от 1 до 30");
         return scanner.nextInt();
     }
@@ -134,26 +139,11 @@ public class Menu {
 
     private void enterGoalForDay() {
         System.out.print("Задайте новую цель по количеству шагов: ");
-        int userGoal = checkNumber();
+        int userGoal = checkInput();
 
         stepTracker.setTargetNumberOfSteps(userGoal);
         System.out.println("Целевое количество шагов - " +
                 stepTracker.getTargetNumberOfSteps() + "\n");
-    }
-
-    private void outputStatisticsByMonth() {
-        int month = returnItemOfMonth();
-        int[] statisticsByMonth = stepTracker.getStatisticsByMonth(month);
-
-        System.out.println("\nРезультат за месяц " +
-                Month.values()[month].getTitle() + "\n");
-
-        for (int i = 1; i <= statisticsByMonth.length; i++) {
-            System.out.print(i + " день - " + statisticsByMonth[i - 1] + "; ");
-            if (i % 5 == 0) {
-                System.out.println();
-            }
-        }
     }
 
     private void saveResultSteps() {
@@ -161,17 +151,21 @@ public class Menu {
         int day = returnItemOfDay();
 
         System.out.println("Укажите результат:");
-        int result = checkNumber();
+        int result = checkInput();
 
         stepTracker.saveResult(month, day, result);
     }
 
-    private int checkNumber() {
-        Scanner scanner = new Scanner(System.in);
+    /**
+     * Прочитал в задании, что число должно быть неотрицательным,
+     * а подумал, что оно должно быть четным xD
+     * В - внимательность))
+     */
+    private int checkInput() {
         int userInput = scanner.nextInt();
 
-        if (userInput % 2 != 0 || userInput < 0) {
-            System.out.println("Введите четное количество шагов");
+        if (userInput < 0) {
+            System.err.println("Введите четное количество шагов");
             userInput = scanner.nextInt();
         }
 
@@ -180,7 +174,7 @@ public class Menu {
 
     private void findOutTheBestSeries() {
         int month = returnItemOfMonth();
-        Map<Integer, Integer> result = stepTracker.findOutTheBestResult(month);
+        var result = stepTracker.findOutTheBestResult(month);
 
         System.out.println("Лучшая серия за месяц " + Month.values()[month].getTitle());
         for (var key : result.keySet()) {
@@ -200,8 +194,46 @@ public class Menu {
     private void calculateToKm() {
         int month = returnItemOfMonth();
         int day = returnItemOfDay();
-        double result = stepTracker.calculateStepsToKm(month, day);
+        double result = stepTracker.calculateStepsToKmForDay(month, day);
 
         System.out.println("Всего пройдено " + result);
+    }
+
+    private void outputStatisticsByMonth() {
+        int month = returnItemOfMonth();
+        int[] statisticsByMonth = stepTracker.getStatisticsByMonth(month);
+        var monthValue = Month.values()[month].getTitle();
+        var result = stepTracker.findOutTheBestResult(month);
+
+        System.out.println("\nРезультат за месяц " +
+                monthValue + " по дням\n");
+
+        for (int i = 1; i <= statisticsByMonth.length; i++) {
+            System.out.print(i + " день - " + statisticsByMonth[i - 1] + "; ");
+            if (i % 5 == 0) {
+                System.out.println();
+            }
+        }
+
+        System.out.println("Общее количество шагов за " + monthValue +
+                ": " + stepTracker.getTotalStepsByMonth(month));
+
+        System.out.println("Максимально пройденное количество шагов за " + monthValue +
+                ": " + stepTracker.lookForMaximumStepsByMonth(month));
+
+        System.out.println("Среднее количество шагов за " + monthValue +
+                ": " + stepTracker.calculateAverage(month));
+
+        System.out.println("Пройденная дистанция в км за " + monthValue +
+                ": " + stepTracker.calculateStepsToKmForMonth(month));
+
+        System.out.println("Количество соженных калорий за " + monthValue +
+                ": " + stepTracker.calculateStepsToCalForMonth(month));
+
+        System.out.println("Лучшая серия за месяц " + monthValue);
+        for (var key : result.keySet()) {
+            System.out.println("День " + key +
+                    ", шагов " + result.get(key));
+        }
     }
 }
