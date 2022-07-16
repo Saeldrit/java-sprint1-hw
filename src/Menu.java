@@ -8,6 +8,12 @@ public class Menu {
     private static final List<String> menu;
     private final StepTracker stepTracker;
 
+    static {
+        scanner = new Scanner(System.in);
+        menu = new ArrayList<>();
+        initializationMenu();
+    }
+
     public Menu(StepTracker stepTracker) {
         this.stepTracker = stepTracker;
     }
@@ -18,12 +24,6 @@ public class Menu {
 
     public static void setMenu(String menuItem) {
         menu.add(menuItem);
-    }
-
-    static {
-        scanner = new Scanner(System.in);
-        menu = new ArrayList<>();
-        initializationMenu();
     }
 
     /**
