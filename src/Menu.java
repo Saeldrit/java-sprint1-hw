@@ -26,11 +26,6 @@ public class Menu {
         menu.add(menuItem);
     }
 
-    /**
-     * Теперь, если добавить два простых метода для menu, можно получить пункт меню по индексу,
-     * изменить его и сохранить. На данном этапе это излишне, не стал писать неиспользуемые методы.
-     * Хотя этот комментарий длинее, чем получились бы два метода))
-     */
     private static void initializationMenu() {
         setMenu("1 - Общее количество пройденных шагов за месяц");
         setMenu("2 - Максимальное количество пройденных шагов за месяц");
@@ -87,7 +82,8 @@ public class Menu {
                 outputStatisticsByMonth();
                 break;
             default:
-                System.err.println("Incorrect Input");
+                System.err.println("Мы только познакомились, " +
+                        "а ты уже вводишь некорретные данные? Ай-я-яй...");
         }
     }
 
@@ -119,12 +115,12 @@ public class Menu {
             }
         }
 
-        return scanner.nextInt() - 1;
+        return checkInputMonth() - 1;
     }
 
     private int returnItemOfDay() {
         System.out.println("Введите день от 1 до 30");
-        return scanner.nextInt();
+        return checkInputDay();
     }
 
     private void getResultByDay() {
@@ -139,7 +135,7 @@ public class Menu {
 
     private void enterGoalForDay() {
         System.out.print("Задайте новую цель по количеству шагов: ");
-        int userGoal = checkInput();
+        int userGoal = checkInputSteps();
 
         stepTracker.setTargetNumberOfSteps(userGoal);
         System.out.println("Целевое количество шагов - " +
@@ -151,25 +147,9 @@ public class Menu {
         int day = returnItemOfDay();
 
         System.out.println("Укажите результат:");
-        int result = checkInput();
+        int result = checkInputSteps();
 
         stepTracker.saveResult(month, day, result);
-    }
-
-    /**
-     * Прочитал в задании, что число должно быть неотрицательным,
-     * а подумал, что оно должно быть четным xD
-     * В - внимательность))
-     */
-    private int checkInput() {
-        int userInput = scanner.nextInt();
-
-        if (userInput < 0) {
-            System.err.println("Введите четное количество шагов");
-            userInput = scanner.nextInt();
-        }
-
-        return userInput;
     }
 
     private void findOutTheBestSeries() {
@@ -235,5 +215,48 @@ public class Menu {
             System.out.println("День " + key +
                     ", шагов " + result.get(key));
         }
+    }
+
+    /**
+     * Я не стал выбрасывать исключение, пока остановлюсь на простом выводе сообщения
+     */
+    private int checkInputSteps() {
+        int userInput = scanner.nextInt();
+
+        while (userInput <= 0) {
+            if (userInput == 0) {
+                System.err.println("Нулям, чтоб обрести силу, надо оказаться позади другого числа.");
+            } else {
+                System.err.println("«Оставайся в трудном положении, когда должен». — Йода");
+            }
+            userInput = scanner.nextInt();
+        }
+
+        return userInput;
+    }
+
+    private int checkInputDay() {
+        int day = scanner.nextInt();
+        int dayLength = stepTracker.getDayLength();
+
+        while (day > dayLength ||
+                day <= 0) {
+            System.err.println("Мы тут все расстроились, " +
+                    "но в жизни робота только 30 дней, от 1 до 30");
+            day = scanner.nextInt();
+        }
+        return day;
+    }
+
+    private int checkInputMonth() {
+        int idMonth = scanner.nextInt();
+        int monthLength = Month.values().length;
+
+        while (idMonth > monthLength ||
+                idMonth <= 0) {
+            System.err.println("Уппсс...но на планете Земля пока 12 месяцев, от 1 до 12");
+            idMonth = scanner.nextInt();
+        }
+        return idMonth;
     }
 }

@@ -134,6 +134,11 @@ public class StepTracker {
         return (getTotalStepsByMonth(month) / steps.length);
     }
 
+    public int getDayLength() {
+        MonthData monthData = new MonthData();
+        return monthData.getArray().length;
+    }
+
     private static class MonthData {
         private final int[] array = new int[30];
 
